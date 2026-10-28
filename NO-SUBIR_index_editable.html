@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!--! © 2026 Impulso AVSA · Desarrollado por Lizeth Paola Santodomingo Carrascal · Todos los derechos reservados. Prohibida su copia, modificación, distribución o uso sin autorización escrita de la autora. -->
+<!--! Elaborado por la Analista de Medición de Competencias de AVSA · V 2026 · © 2026 Impulso AVSA · Todos los derechos reservados. Prohibida su copia, modificación, distribución o uso sin autorización escrita de la autora. -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -379,7 +379,7 @@ dialog::backdrop{background:rgba(20,18,14,.55)}
 </section>
 
 <div class="foot-note">
-  <span style="flex-basis:100%;order:3;font-size:12px">© 2026 Impulso AVSA · Desarrollado por Lizeth Paola Santodomingo Carrascal · Todos los derechos reservados</span>
+  <span style="flex-basis:100%;order:3;font-size:12px">Elaborado por la Analista de Medición de Competencias de AVSA · V 2026 · © 2026 Impulso AVSA · Todos los derechos reservados</span>
   <span>IMPULSO AVSA · Ruta personal de aprendizaje. Tu avance se guarda automáticamente y puedes continuar desde cualquier dispositivo con tu enlace.</span>
   <span class="sync" id="syncState" aria-live="polite"></span>
 </div>
@@ -491,7 +491,7 @@ async function load(){
   if(!snap.exists()){ gate('Este enlace no está disponible','Pide tu enlace actualizado a Gestión Humana.'); return false; }
   perfil = snap.data();
   const modulos = (perfil.misiones||[]).map(p => {
-    const b = BANCO.find(x => x.code === p.code); if(!b) return null;
+    const b = (p.def && p.def.reto) ? p.def : BANCO.find(x => x.code === p.code); if(!b) return null;
     return {...b,
       video:{...b.video, url:p.video || b.video.url},
       compromiso:p.compromiso || b.compromiso,
@@ -909,9 +909,10 @@ function drawOrder(i){
 /* --- Clasificar --- */
 function drawClass(i){
   const r=mods()[i].reto, G=document.getElementById('game');
-  G.innerHTML=`<div class="cls-help">${r.categorias.map(c=>`<div><b>${c}:</b> ${esc(r.ayuda[c])}</div>`).join('')}</div>`+
+  const ay=r.ayuda||{}, help=r.categorias.filter(c=>ay[c]);
+  G.innerHTML=(help.length?`<div class="cls-help">${help.map(c=>`<div><b>${esc(c)}:</b> ${esc(ay[c])}</div>`).join('')}</div>`:'')+
     r.items.map((it,k)=>`<div class="cls-item ${game.marks?(game.marks[k]?'good':'bad'):''}"><p>“${esc(it.t)}”</p>
-      <div class="seg">${r.categorias.map(c=>`<button data-k="${k}" data-c="${c}" class="${game.ans[k]===c?'on':''}">${c}</button>`).join('')}</div></div>`).join('')+
+      <div class="seg">${r.categorias.map(c=>`<button data-k="${k}" data-c="${esc(c)}" class="${game.ans[k]===c?'on':''}">${esc(c)}</button>`).join('')}</div></div>`).join('')+
     `<div class="dlg-foot" style="margin-top:12px"><button class="gbtn" id="gCheck">Revisar clasificación</button></div>`;
   G.querySelectorAll('.seg button').forEach(b=>b.onclick=()=>{ game.ans[+b.dataset.k]=b.dataset.c; if(game.marks) game.marks[+b.dataset.k]=null; drawClass(i); });
   G.querySelector('#gCheck').onclick=()=>{

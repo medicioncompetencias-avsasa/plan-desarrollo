@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!--! © 2026 Impulso AVSA · Desarrollado por Lizeth Paola Santodomingo Carrascal · Todos los derechos reservados. Prohibida su copia, modificación, distribución o uso sin autorización escrita de la autora. -->
+<!--! Elaborado por la Analista de Medición de Competencias de AVSA · V 2026 · © 2026 Impulso AVSA · Todos los derechos reservados. Prohibida su copia, modificación, distribución o uso sin autorización escrita de la autora. -->
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -123,6 +123,34 @@ dialog::backdrop{background:rgba(20,18,14,.55)}
   main{padding:14px 12px 30px}
   .top{padding:14px 16px}
 }
+
+/* Catálogo de competencias */
+.cat-list{display:grid;gap:8px;margin-top:8px}
+.cat-row{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:14px;padding:10px 12px;background:#fff}
+.cat-row .ic{font-size:26px;width:40px;text-align:center}
+.cat-row .tx{flex:1;min-width:0}
+.cat-row .tx b{display:block;font-size:15px}
+.cat-row .tx small{color:var(--muted);font-size:12.5px}
+.tag{display:inline-block;font-size:11.5px;font-weight:800;padding:3px 8px;border-radius:20px;background:#ECEAE5;color:#5f5b54;margin-left:6px;vertical-align:middle}
+.tag.new{background:#F5ECD4;color:#5a4516}
+.emo{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.emo button{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:21px;cursor:pointer}
+.emo button.on{border:2px solid #1F1F1F;background:var(--soft)}
+.arr-row{display:flex;gap:8px;align-items:flex-start;margin-top:8px}
+.arr-row input,.arr-row select,.arr-row textarea{flex:1}
+.arr-row .w{flex:0 0 170px}
+.arr-row .n{flex:0 0 26px;height:38px;display:grid;place-items:center;font-weight:900;color:var(--muted)}
+.arr-row .del{flex:0 0 38px;height:38px;border-radius:10px;border:1px solid #e3b4ad;background:#fff;color:#a33224;cursor:pointer;font-size:18px}
+.tipo{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+.tipo button{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 8px;cursor:pointer;font-weight:800;font-size:13px;line-height:1.3}
+.tipo button span{display:block;font-size:22px}
+.tipo button.on{border:2px solid #1F1F1F;background:var(--soft)}
+.pv{margin-top:12px;background:var(--soft);border-radius:12px;padding:12px;overflow-x:auto}
+.pv-grid{display:grid;grid-template-columns:repeat(var(--c),24px);gap:2px;width:max-content;margin:0 auto}
+.pv-grid span{width:24px;height:24px;display:grid;place-items:center;font-weight:800;font-size:12px;border-radius:4px}
+.pv-grid span.l{background:#fff;border:1.5px solid #1F1F1F}
+.pv-grid span.s{background:#fff;border:1px solid var(--line)}
+@media (max-width:900px){ .tipo{grid-template-columns:repeat(2,1fr)} .arr-row{flex-wrap:wrap} .arr-row .w{flex:1 1 100%} }
 </style>
 </head>
 <body>
@@ -140,7 +168,7 @@ dialog::backdrop{background:rgba(20,18,14,.55)}
     <div id="lMsg" aria-live="polite"></div>
     <button class="btn btn-dark btn-block" id="lBtn" type="submit">Ingresar</button>
     <button class="linkbtn" id="lReset" type="button">¿Olvidaste tu contraseña?</button>
-    <p style="margin:18px 0 0;font-size:11.5px;line-height:1.4">© 2026 Impulso AVSA · Desarrollado por Lizeth Paola Santodomingo Carrascal · Todos los derechos reservados</p>
+    <p style="margin:18px 0 0;font-size:11.5px;line-height:1.4">Elaborado por la Analista de Medición de Competencias de AVSA · V 2026 · © 2026 Impulso AVSA · Todos los derechos reservados</p>
   </form>
 </section>
 
@@ -165,6 +193,7 @@ dialog::backdrop{background:rgba(20,18,14,.55)}
         <option>Sin iniciar</option><option>En curso</option><option>Completada</option><option>Enlace desactivado</option>
       </select>
       <span class="spacer"></span>
+      <button class="btn btn-ghost" id="catBtn">📚 Competencias</button>
       <button class="btn btn-ghost" id="xlsBtn">⬇ Exportar Excel</button>
       <button class="btn btn-gold" id="newBtn">+ Nuevo trabajador</button>
     </div>
@@ -179,12 +208,13 @@ dialog::backdrop{background:rgba(20,18,14,.55)}
       </table>
       <div class="empty hidden" id="empty"></div>
     </div>
-    <p style="margin:22px 0 0;font-size:12px;color:var(--muted);text-align:center">© 2026 Impulso AVSA · Desarrollado por Lizeth Paola Santodomingo Carrascal · Todos los derechos reservados</p>
+    <p style="margin:22px 0 0;font-size:12px;color:var(--muted);text-align:center">Elaborado por la Analista de Medición de Competencias de AVSA · V 2026 · © 2026 Impulso AVSA · Todos los derechos reservados</p>
   </main>
 </div>
 
 <dialog id="perfilDlg"></dialog>
 <dialog id="qrDlg"></dialog>
+<dialog id="catDlg"></dialog>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script type="module">
@@ -201,7 +231,7 @@ dialog::backdrop{background:rgba(20,18,14,.55)}
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut, sendPasswordResetEmail }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, collection, doc, getDoc, onSnapshot, writeBatch, updateDoc, serverTimestamp, deleteField }
+import { getFirestore, collection, doc, getDoc, onSnapshot, writeBatch, updateDoc, serverTimestamp, deleteField, deleteDoc }
   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -215,7 +245,7 @@ const firebaseConfig = {
 
 /* Competencias disponibles y sus valores por defecto (se editan por persona en el perfil).
    El reto, el objetivo y las ideas viven en index.html y son iguales para todos. */
-const COMPETENCIAS = [
+const BUILTIN = [
   {code:'team', t:'Trabajo en equipo', icon:'🤝',
    video:'https://www.youtube.com/watch?v=INRzFKTzmZs',
    compromiso:'Al finalizar cada actividad asignada, pregunta si algún compañero requiere apoyo y bríndalo cuando sea posible.',
@@ -237,13 +267,18 @@ const COMPETENCIAS = [
    evidencia:'No presentar errores o reprocesos por omisión de pasos previamente establecidos en las actividades revisadas.',
    seguimiento:'1 mes'}
 ];
-const compBy = c => COMPETENCIAS.find(x => x.code === c) || {code:c, t:c, icon:'📌'};
+let catalogo = [];   // competencias creadas en el panel (colección catalogo)
+const allComps = () => [...BUILTIN, ...catalogo.map(d => ({code:d.code, t:d.t, icon:d.icon, video:(d.video||{}).url||'',
+  compromiso:d.compromiso||'', evidencia:d.evidencia||'', seguimiento:d.seguimiento||'1 mes', custom:true, def:d}))];
+const compBy = c => allComps().find(x => x.code === c) || {code:c, t:c, icon:'📌'};
+/* Lo que se guarda en la ruta del trabajador: datos de la persona + definición completa si es una competencia creada */
+const misionDe = c => { const m = compBy(c.code), o = {code:c.code, video:c.video||'', compromiso:c.compromiso||'', evidencia:c.evidencia||'', seguimiento:c.seguimiento||''}; if(m.def) o.def = m.def; return o; };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-let trabajadores = [], rutas = {}, unsubs = [], loaded = {t:false, r:false};
+let trabajadores = [], rutas = {}, unsubs = [], loaded = {t:false, r:false, c:false};
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let tt; function toast(m){ const t=$('toast'); t.textContent=m; t.classList.add('show'); clearTimeout(tt); tt=setTimeout(()=>t.classList.remove('show'),3400); }
@@ -289,7 +324,7 @@ $('lReset').onclick = async () => {
 $('logoutBtn').onclick = () => signOut(auth);
 
 onAuthStateChanged(auth, async user => {
-  unsubs.forEach(u => u()); unsubs=[]; trabajadores=[]; rutas={}; loaded={t:false,r:false};
+  unsubs.forEach(u => u()); unsubs=[]; trabajadores=[]; rutas={}; catalogo=[]; loaded={t:false,r:false,c:false};
   if(!user){ $('appView').classList.add('hidden'); $('loginView').classList.remove('hidden'); return; }
   let nombre='';
   try{
@@ -311,6 +346,10 @@ onAuthStateChanged(auth, async user => {
   unsubs.push(onSnapshot(collection(db,'rutas'), s => {
     rutas = {}; s.forEach(d => rutas[d.id] = d.data()); loaded.r=true; render();
   }, onErr));
+  unsubs.push(onSnapshot(collection(db,'catalogo'), s => {
+    catalogo = s.docs.map(d => ({...(d.data().def||{}), code:d.id})).filter(d => d.reto); loaded.c=true; render();
+    if(catDlg.open && catView==='list') drawCat(true);
+  }, err => { loaded.c=true; render(); if(err.code==='permission-denied') toast('Para crear competencias, publica las reglas nuevas de Firestore.'); }));
 });
 
 /* ================= Cálculo de avance (igual que en la ruta del trabajador) ================= */
@@ -418,7 +457,7 @@ function drawPerfil(keepScroll){
         <button class="btn btn-danger btn-sm" data-rm="${i}">Quitar</button></div>
       <label for="cv_${i}">Video (enlace de YouTube, Vimeo o Google Drive)</label>
       <input id="cv_${i}" data-c="${i}" data-k="video" value="${esc(c.video)}">
-      ${c.video && !isVideoOk(c.video) ? '<div class="warn-txt">Este enlace no se podrá ver dentro de la página; el trabajador tendrá que abrirlo aparte.</div>' : ''}
+      <div id="vw_${i}">${vidWarn(c.video)}</div>
       <label for="cc_${i}">Compromiso de aplicación</label>
       <textarea id="cc_${i}" data-c="${i}" data-k="compromiso">${esc(c.compromiso)}</textarea>
       <div class="grid2">
@@ -430,7 +469,7 @@ function drawPerfil(keepScroll){
     </div>`;
   }).join('');
 
-  const libres = COMPETENCIAS.filter(m => !ed.sel.some(c => c.code===m.code));
+  const libres = allComps().filter(m => !ed.sel.some(c => c.code===m.code));
   perfilDlg.innerHTML = `
     <div class="dh"><div><div class="kicker">${ed.id?'Editar perfil':'Nuevo trabajador'}</div><h2>${esc(ed.f.nombre || 'Perfil del trabajador')}</h2></div>
       <button class="x" data-close aria-label="Cerrar">×</button></div>
@@ -460,9 +499,8 @@ function drawPerfil(keepScroll){
 perfilDlg.addEventListener('input', e => {
   const el = e.target;
   if(el.dataset.pf){ ed.f[el.dataset.pf] = el.value; if(el.dataset.pf==='nombre') perfilDlg.querySelector('.dh h2').textContent = el.value || 'Perfil del trabajador'; }
-  if(el.dataset.c !== undefined){ ed.sel[+el.dataset.c][el.dataset.k] = el.value; }
+  if(el.dataset.c !== undefined){ ed.sel[+el.dataset.c][el.dataset.k] = el.value; if(el.dataset.k==='video') perfilDlg.querySelector('#vw_'+el.dataset.c).innerHTML = vidWarn(el.value); }
 });
-perfilDlg.addEventListener('change', e => { if(e.target.dataset.k==='video') drawPerfil(true); });
 perfilDlg.addEventListener('click', async e => {
   const b = e.target.closest('button'); if(!b) return;
   const d = b.dataset;
@@ -489,7 +527,7 @@ async function guardar(btn){
   if(sinComp){ pfMsg('Falta el compromiso de ' + compBy(sinComp.code).t + '.'); return; }
 
   btn.disabled = true; btn.textContent = 'Guardando…';
-  const ruta = {nombre:f.nombre, cargo:f.cargo, codigos:sel.map(c=>c.code), misiones:sel, editado:serverTimestamp()};
+  const ruta = {nombre:f.nombre, cargo:f.cargo, codigos:sel.map(c=>c.code), misiones:sel.map(misionDe), editado:serverTimestamp()};
   const b = writeBatch(db);
   try{
     let newId = null;
@@ -524,6 +562,386 @@ async function eliminar(){
   const t = trabajadores.find(x=>x.id===ed.id);
   if(!confirm(`¿Eliminar a ${t.nombre}? Se borran su perfil, su avance y su enlace. Esta acción no se puede deshacer.\n\nSi solo quieres que deje de entrar, usa "Desactivar enlace".`)) return;
   try{ const b=writeBatch(db); b.delete(doc(db,'trabajadores',t.id)); b.delete(doc(db,'rutas',t.codigo)); await b.commit(); perfilDlg.close(); toast('Trabajador eliminado'); }
+  catch(err){ toast('No se pudo eliminar (' + (err.code||err.message) + ')'); }
+}
+
+
+/* =====================================================================
+   CATÁLOGO DE COMPETENCIAS (creadas por Gestión Humana)
+   Se guardan en catalogo/{code} = {def, creado, editado}. Al asignarlas,
+   la definición completa (incluido el reto) se copia en rutas/{codigo}.misiones[].def
+   para que el trabajador la lea sin acceder al catálogo.
+   ===================================================================== */
+const catDlg = $('catDlg');
+let catView = 'list', ce = null;
+const EMOJIS = ['🤝','🎯','💬','🔍','🧭','⚡','🛡️','📋','💡','🌱','🧠','⏱️','🏆','🔧','📈','❤️','🙌','📣','🧩','✅'];
+const TIPOS = [
+  {k:'crucigrama', ic:'🧩', t:'Crucigrama', d:'Palabras con pista'},
+  {k:'sopa', ic:'🔤', t:'Sopa de letras', d:'Palabras a encontrar'},
+  {k:'ordenar', ic:'🔢', t:'Ordenar pasos', d:'Pasos en orden correcto'},
+  {k:'clasificar', ic:'🗂️', t:'Clasificar frases', d:'Frases por categoría'}
+];
+const INSTR = {
+  crucigrama: () => 'Completa el crucigrama con las ideas del video. Toca una pista o una casilla para escribir.',
+  sopa: n => `Encuentra las ${n} palabras. Toca la primera letra y luego la última de cada palabra (horizontal, vertical o diagonal).`,
+  ordenar: n => `Ordena del 1 al ${n} los pasos. Usa las flechas para mover cada paso.`,
+  clasificar: () => 'Clasifica cada frase en la categoría correcta.'
+};
+const CIERRE_DEF = 'Muy bien. Lleva esta idea a tu trabajo diario.';
+const normWord = s => String(s||'').toUpperCase().replace(/Ñ/g,'\u0001').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/\u0001/g,'Ñ').replace(/[^A-ZÑ]/g,'');
+const newCode = () => 'c' + genCode(9).toLowerCase().replace(/[^a-z0-9]/g,'x');
+const usersOf = code => trabajadores.filter(t => (t.competencias||[]).some(c => c.code===code));
+
+$('catBtn').onclick = () => { catView='list'; ce=null; drawCat(); catDlg.showModal(); };
+
+function blankForm(){
+  return {code:null, t:'', icon:'🧭', tag:'', short:'', dur:'8–10 min', goal:'', ideas:['','',''],
+    videoUrl:'', videoTitulo:'', compromiso:'', evidencia:'', seguimiento:'1 mes',
+    tipo:'crucigrama', instruccion:'', cierre:'',
+    cw:[{w:'',clue:''},{w:'',clue:''},{w:'',clue:''},{w:'',clue:''}],
+    sp:['','','','',''], ord:['','','',''],
+    cls:{cats:[{n:'',a:''},{n:'',a:''}], items:[{t:'',cat:''},{t:'',cat:''},{t:'',cat:''},{t:'',cat:''}]},
+    pv:null};
+}
+function formFromDef(code, d){
+  const f = blankForm(), r = d.reto||{};
+  Object.assign(f, {code, t:d.t||'', icon:d.icon||'🧭', tag:d.tag||'', short:d.short||'', dur:d.dur||'8–10 min', goal:d.goal||'',
+    ideas:[0,1,2].map(i => (d.ideas||[])[i]||''), videoUrl:(d.video||{}).url||'', videoTitulo:(d.video||{}).titulo||'',
+    compromiso:d.compromiso||'', evidencia:d.evidencia||'', seguimiento:d.seguimiento||'1 mes',
+    tipo:r.tipo||'crucigrama', instruccion:r.instruccion||'', cierre:r.cierre===CIERRE_DEF?'':(r.cierre||'')});
+  if(r.tipo==='crucigrama') f.cw = (r.palabras||[]).map(p => ({w:p.w, clue:p.clue}));
+  if(r.tipo==='sopa'){ f.sp = [...(r.palabras||[])]; f.pv = {tipo:'sopa', key:f.sp.join('|'), grid:r.grid}; }
+  if(r.tipo==='ordenar') f.ord = [...(r.pasos||[])];
+  if(r.tipo==='clasificar') f.cls = {cats:(r.categorias||[]).map(n => ({n, a:(r.ayuda||{})[n]||''})), items:(r.items||[]).map(it => ({t:it.t, cat:it.cat}))};
+  // la instrucción por defecto se recalcula al guardar
+  const n = r.tipo==='sopa' ? (r.palabras||[]).length : r.tipo==='ordenar' ? (r.pasos||[]).length : 0;
+  if(INSTR[r.tipo] && f.instruccion === INSTR[r.tipo](n)) f.instruccion = '';
+  return f;
+}
+
+/* ---------- Lista ---------- */
+function drawCat(keep){
+  const prevTop = keep && catDlg.querySelector('.db') ? catDlg.querySelector('.db').scrollTop : 0;
+  if(catView==='edit'){ drawCatEdit(); if(keep) catDlg.querySelector('.db').scrollTop = prevTop; return; }
+  const row = (m, custom) => {
+    const n = usersOf(m.code).length;
+    return `<div class="cat-row"><div class="ic">${esc(m.icon)}</div>
+      <div class="tx"><b>${esc(m.t)} ${custom?'<span class="tag new">Creada por ti</span>':'<span class="tag">Predeterminada</span>'}</b>
+      <small>${custom ? esc(TIPOS.find(x=>x.k===m.def.reto.tipo)?.t||'') + ' · ' : ''}${n ? `Asignada a ${n} ${n===1?'persona':'personas'}` : 'Sin asignar'}</small></div>
+      ${custom ? `<button class="btn btn-ghost btn-sm" data-cedit="${m.code}">Editar</button><button class="btn btn-danger btn-sm" data-cdel="${m.code}">Eliminar</button>` : ''}</div>`;
+  };
+  const customs = allComps().filter(m => m.custom).sort((a,b) => a.t.localeCompare(b.t,'es'));
+  catDlg.innerHTML = `
+    <div class="dh"><div><div class="kicker">Catálogo</div><h2>Competencias</h2>
+      <div style="color:var(--muted);font-size:14px">Crea las competencias que necesites, con su video, sus ideas y su reto. Luego las asignas a cada trabajador desde su perfil.</div></div>
+      <button class="x" data-close aria-label="Cerrar">×</button></div>
+    <div class="db">
+      <div class="sec">Creadas por ti (${customs.length})</div>
+      ${customs.length ? `<div class="cat-list">${customs.map(m=>row(m,true)).join('')}</div>` : '<div class="alert al-gold">Aún no has creado competencias. Toca <b>+ Nueva competencia</b>.</div>'}
+      <div class="sec">Predeterminadas</div>
+      <div class="cat-list">${BUILTIN.map(m=>row(m,false)).join('')}</div>
+    </div>
+    <div class="df"><button class="btn btn-ghost" data-close>Cerrar</button><button class="btn btn-gold" data-cnew>+ Nueva competencia</button></div>`;
+  if(keep) catDlg.querySelector('.db').scrollTop = prevTop;
+}
+
+/* ---------- Editor ---------- */
+function drawCatEdit(){
+  const f = ce, inp = (k, lbl, ph='', req=true, hint='') => `<div><label for="cf_${k}">${lbl} ${req?'<span class="req">*</span>':''}</label>
+    <input id="cf_${k}" data-cf="${k}" value="${esc(f[k])}" placeholder="${esc(ph)}">${hint?`<div class="hint">${hint}</div>`:''}</div>`;
+  const ta = (k, lbl, ph='', req=true) => `<div><label for="cf_${k}">${lbl} ${req?'<span class="req">*</span>':''}</label>
+    <textarea id="cf_${k}" data-cf="${k}" placeholder="${esc(ph)}">${esc(f[k])}</textarea></div>`;
+  const del = (arr,i,min) => `<button class="del" data-adel="${arr}" data-i="${i}" aria-label="Quitar" ${getArr(arr).length<=min?'disabled style="opacity:.35"':''}>×</button>`;
+
+  let reto = '';
+  if(f.tipo==='crucigrama'){
+    reto = `<div class="hint">Escribe de 4 a 8 palabras (3 a 12 letras, sin espacios) con su pista. El sistema arma la cuadrícula: las palabras deben compartir letras para poder cruzarse.</div>
+      ${f.cw.map((p,i)=>`<div class="arr-row"><span class="n">${i+1}</span>
+        <input class="w" data-arr="cw" data-i="${i}" data-k="w" value="${esc(p.w)}" placeholder="PALABRA" style="text-transform:uppercase">
+        <input data-arr="cw" data-i="${i}" data-k="clue" value="${esc(p.clue)}" placeholder="Pista para encontrar la palabra">${del('cw',i,4)}</div>`).join('')}
+      ${f.cw.length<8?'<div class="add-row"><button class="btn btn-ghost btn-sm" data-aadd="cw">+ Agregar palabra</button></div>':''}
+      <div class="add-row"><button class="btn btn-dark btn-sm" data-preview>Ver cómo queda</button></div>`;
+  }
+  if(f.tipo==='sopa'){
+    reto = `<div class="hint">Escribe de 4 a 8 palabras (3 a 12 letras, sin espacios). El sistema las esconde en la sopa en horizontal, vertical o diagonal.</div>
+      ${f.sp.map((w,i)=>`<div class="arr-row"><span class="n">${i+1}</span>
+        <input data-arr="sp" data-i="${i}" value="${esc(w)}" placeholder="PALABRA" style="text-transform:uppercase">${del('sp',i,4)}</div>`).join('')}
+      ${f.sp.length<8?'<div class="add-row"><button class="btn btn-ghost btn-sm" data-aadd="sp">+ Agregar palabra</button></div>':''}
+      <div class="add-row"><button class="btn btn-dark btn-sm" data-preview>${f.pv&&f.pv.tipo==='sopa'?'Generar otra sopa':'Ver cómo queda'}</button></div>`;
+  }
+  if(f.tipo==='ordenar'){
+    reto = `<div class="hint">Escribe de 3 a 7 pasos <b>en el orden correcto</b>. El trabajador los verá desordenados y debe organizarlos.</div>
+      ${f.ord.map((w,i)=>`<div class="arr-row"><span class="n">${i+1}</span>
+        <input data-arr="ord" data-i="${i}" value="${esc(w)}" placeholder="Paso ${i+1}">${del('ord',i,3)}</div>`).join('')}
+      ${f.ord.length<7?'<div class="add-row"><button class="btn btn-ghost btn-sm" data-aadd="ord">+ Agregar paso</button></div>':''}`;
+  }
+  if(f.tipo==='clasificar'){
+    const cats = f.cls.cats.map(c=>c.n.trim()).filter(Boolean);
+    reto = `<div class="hint">Define 2 o 3 categorías (por ejemplo: Correcto / Incorrecto) y de 4 a 10 frases. El trabajador debe ubicar cada frase en su categoría.</div>
+      <label>Categorías <span class="req">*</span></label>
+      ${f.cls.cats.map((c,i)=>`<div class="arr-row"><span class="n">${i+1}</span>
+        <input class="w" data-arr="cls.cats" data-i="${i}" data-k="n" value="${esc(c.n)}" placeholder="Nombre de la categoría">
+        <input data-arr="cls.cats" data-i="${i}" data-k="a" value="${esc(c.a)}" placeholder="Explicación breve (opcional)">${del('cls.cats',i,2)}</div>`).join('')}
+      ${f.cls.cats.length<3?'<div class="add-row"><button class="btn btn-ghost btn-sm" data-aadd="cls.cats">+ Agregar categoría</button></div>':''}
+      <label style="margin-top:16px">Frases <span class="req">*</span></label>
+      ${f.cls.items.map((it,i)=>`<div class="arr-row"><span class="n">${i+1}</span>
+        <input data-arr="cls.items" data-i="${i}" data-k="t" value="${esc(it.t)}" placeholder="Frase o situación">
+        <select class="w" data-arr="cls.items" data-i="${i}" data-k="cat"><option value="">Categoría correcta…</option>${cats.map(c=>`<option ${c===it.cat?'selected':''}>${esc(c)}</option>`).join('')}</select>${del('cls.items',i,4)}</div>`).join('')}
+      ${f.cls.items.length<10?'<div class="add-row"><button class="btn btn-ghost btn-sm" data-aadd="cls.items">+ Agregar frase</button></div>':''}`;
+  }
+
+  let pv = '';
+  if(f.pv && f.pv.tipo===f.tipo){
+    if(f.tipo==='crucigrama' && f.pv.res){
+      const r=f.pv.res, cells={}; r.palabras.forEach(p=>[...p.w].forEach((ch,k)=>{ cells[(p.r+(p.dir==='d'?k:0))+','+(p.c+(p.dir==='a'?k:0))]=ch; }));
+      let g=''; for(let y=0;y<r.filas;y++) for(let x=0;x<r.cols;x++){ const ch=cells[y+','+x]; g+=ch?`<span class="l">${ch}</span>`:'<span></span>'; }
+      pv = `<div class="pv"><div class="hint" style="margin:0 0 8px;text-align:center">Vista previa (${r.cols}×${r.filas}). El trabajador verá las casillas vacías.</div><div class="pv-grid" style="--c:${r.cols}">${g}</div></div>`;
+      if(f.pv.fallo.length) pv += `<div class="alert al-bad">No se pudieron cruzar: <b>${f.pv.fallo.map(esc).join(', ')}</b>. Cámbialas o agrega palabras que compartan letras con ellas.</div>`;
+    }
+    if(f.tipo==='sopa' && f.pv.grid){
+      pv = `<div class="pv"><div class="pv-grid" style="--c:${f.pv.grid.length}">${f.pv.grid.map(row=>[...row].map(ch=>`<span class="s">${ch}</span>`).join('')).join('')}</div></div>`;
+    }
+  }
+
+  catDlg.innerHTML = `
+    <div class="dh"><div><div class="kicker">${f.code?'Editar competencia':'Nueva competencia'}</div><h2>${esc(f.t||'Competencia')}</h2></div>
+      <button class="x" data-cback aria-label="Volver">×</button></div>
+    <div class="db">
+      <div class="sec">1 · Datos de la competencia</div>
+      <div class="grid2">
+        ${inp('t','Nombre de la competencia','Ej.: Orientación al servicio')}
+        ${inp('tag','Palabra clave','Ej.: Servir',false,'Aparece sobre el título de la misión.')}
+        ${inp('short','Descripción corta','Ej.: Atención oportuna y amable.')}
+        ${inp('dur','Duración estimada','8–10 min',false)}
+      </div>
+      <label>Ícono <span class="req">*</span></label>
+      <div class="emo">${EMOJIS.map(e=>`<button data-emo="${e}" class="${f.icon===e?'on':''}" aria-label="Ícono ${e}">${e}</button>`).join('')}</div>
+      ${ta('goal','Objetivo de la misión','Ej.: Responder a las solicitudes con oportunidad y respeto.')}
+      <label>Tres ideas para recordar <span class="req">*</span></label>
+      ${f.ideas.map((x,i)=>`<div class="arr-row"><span class="n">${i+1}</span><input data-arr="ideas" data-i="${i}" value="${esc(x)}" placeholder="Idea clave ${i+1}${i?' (opcional)':''}"></div>`).join('')}
+
+      <div class="sec">2 · Video y compromiso por defecto</div>
+      <div class="hint">Se copian al asignar la competencia; en el perfil de cada persona puedes cambiarlos.</div>
+      <div class="grid2">
+        ${inp('videoUrl','Enlace del video','https://www.youtube.com/watch?v=…')}
+        ${inp('videoTitulo','Título del video','Se usa el nombre de la competencia',false)}
+      </div>
+      <div id="cfVidWarn">${vidWarn(f.videoUrl)}</div>
+      ${ta('compromiso','Compromiso de aplicación','Ej.: Antes de cerrar cada solicitud, confirmo con la persona que quedó resuelta.')}
+      <div class="grid2">${ta('evidencia','Evidencia','',false)}${inp('seguimiento','Seguimiento','1 mes',false)}</div>
+
+      <div class="sec">3 · Reto</div>
+      <div class="tipo">${TIPOS.map(x=>`<button data-tipo="${x.k}" class="${f.tipo===x.k?'on':''}"><span>${x.ic}</span>${x.t}<br><small style="font-weight:600;color:var(--muted)">${x.d}</small></button>`).join('')}</div>
+      ${reto}
+      ${pv}
+      <div class="grid2" style="margin-top:6px">
+        ${inp('instruccion','Instrucción del reto','Se usa una instrucción automática',false)}
+        ${inp('cierre','Mensaje al superar el reto',CIERRE_DEF,false)}
+      </div>
+      ${f.code && usersOf(f.code).length ? `<div class="alert al-gold">Esta competencia está asignada a ${usersOf(f.code).length} ${usersOf(f.code).length===1?'persona':'personas'}. Al guardar, su ruta se actualiza con el nuevo objetivo, ideas y reto; su avance se conserva. El video y el compromiso de cada persona no cambian.</div>` : ''}
+      <div id="cfMsg"></div>
+    </div>
+    <div class="df"><button class="btn btn-ghost" data-cback>Volver</button><button class="btn btn-dark" data-csave>${f.code?'Guardar cambios':'Crear competencia'}</button></div>`;
+}
+
+const getArr = path => path.split('.').reduce((o,k)=>o[k], ce);
+const vidWarn = u => u && !isVideoOk(u) ? '<div class="warn-txt">Este enlace no se podrá ver dentro de la página; el trabajador tendrá que abrirlo aparte.</div>' : '';
+/* Actualiza en su lugar las listas de categorías, sin redibujar el formulario */
+function syncCatSelects(){
+  const cats = ce.cls.cats.map(c=>c.n.trim()).filter(Boolean);
+  catDlg.querySelectorAll('select[data-arr="cls.items"]').forEach(sel => {
+    const it = ce.cls.items[+sel.dataset.i]; if(!cats.includes(it.cat)) it.cat = '';
+    sel.innerHTML = '<option value="">Categoría correcta…</option>' + cats.map(c=>`<option ${c===it.cat?'selected':''}>${esc(c)}</option>`).join('');
+  });
+}
+catDlg.addEventListener('input', e => {
+  const el = e.target; if(!ce) return;
+  if(el.dataset.cf){ ce[el.dataset.cf] = el.value; if(el.dataset.cf==='t') catDlg.querySelector('.dh h2').textContent = el.value || 'Competencia'; }
+  if(el.dataset.arr){ const a=getArr(el.dataset.arr), i=+el.dataset.i; if(el.dataset.k) a[i][el.dataset.k]=el.value; else a[i]=el.value; }
+  if(el.dataset.cf==='videoUrl') catDlg.querySelector('#cfVidWarn').innerHTML = vidWarn(el.value);
+  if(el.dataset.arr==='cls.cats') syncCatSelects();
+});
+catDlg.addEventListener('click', async e => {
+  const b = e.target.closest('button'); if(!b) return; const d = b.dataset;
+  if('close' in d){ catDlg.close(); return; }
+  if('cnew' in d){ ce = blankForm(); catView='edit'; drawCat(); return; }
+  if('cback' in d){ if(confirm('¿Salir sin guardar los cambios de esta competencia?')){ ce=null; catView='list'; drawCat(); } return; }
+  if(d.cedit){ const m=compBy(d.cedit); ce=formFromDef(m.code, m.def); catView='edit'; drawCat(); return; }
+  if(d.cdel){ await borrarComp(d.cdel); return; }
+  if(!ce) return;
+  if(d.emo){ ce.icon=d.emo; drawCat(true); return; }
+  if(d.tipo){ ce.tipo=d.tipo; drawCat(true); return; }
+  if(d.aadd){ const a=getArr(d.aadd); a.push(d.aadd==='cw'?{w:'',clue:''}:d.aadd==='cls.cats'?{n:'',a:''}:d.aadd==='cls.items'?{t:'',cat:''}:''); drawCat(true); return; }
+  if(d.adel){ getArr(d.adel).splice(+d.i,1); drawCat(true); return; }
+  if('preview' in d){
+    if(ce.tipo==='crucigrama'){ const v=validarCW(); if(v.err){ cfMsg(v.err); return; } const res=buildCrossword(v.list); ce.pv={tipo:'crucigrama', key:v.key, res, fallo:res.fallo}; }
+    if(ce.tipo==='sopa'){ const v=validarSP(); if(v.err){ cfMsg(v.err); return; } const grid=buildSoup(v.words); if(!grid){ cfMsg('No se pudo armar la sopa con estas palabras. Prueba con palabras más cortas.'); return; } ce.pv={tipo:'sopa', key:v.words.join('|'), grid}; }
+    drawCat(true); return;
+  }
+  if('csave' in d){ await guardarComp(b); return; }
+});
+function cfMsg(m){ const el=catDlg.querySelector('#cfMsg'); if(!el) return; el.innerHTML = m ? `<div class="alert al-bad">${m}</div>` : ''; if(m) el.scrollIntoView({block:'nearest'}); }
+
+/* ---------- Validaciones por tipo de reto ---------- */
+function validarCW(){
+  const list = ce.cw.map(p=>({w:normWord(p.w), clue:(p.clue||'').trim()})).filter(p=>p.w||p.clue);
+  if(list.length<4 || list.length>8) return {err:'El crucigrama necesita entre 4 y 8 palabras.'};
+  const bad = list.find(p=>p.w.length<3||p.w.length>12); if(bad) return {err:`“${esc(bad.w||'(vacía)')}” debe tener entre 3 y 12 letras.`};
+  const noClue = list.find(p=>!p.clue); if(noClue) return {err:`Falta la pista de ${esc(noClue.w)}.`};
+  const dup = list.find((p,i)=>list.findIndex(q=>q.w===p.w)!==i); if(dup) return {err:`La palabra ${esc(dup.w)} está repetida.`};
+  return {list, key:list.map(p=>p.w).join('|')};
+}
+function validarSP(){
+  const words = ce.sp.map(normWord).filter(Boolean);
+  if(words.length<4 || words.length>8) return {err:'La sopa de letras necesita entre 4 y 8 palabras.'};
+  const bad = words.find(w=>w.length<3||w.length>12); if(bad) return {err:`“${esc(bad)}” debe tener entre 3 y 12 letras.`};
+  const dup = words.find((w,i)=>words.indexOf(w)!==i); if(dup) return {err:`La palabra ${esc(dup)} está repetida.`};
+  return {words};
+}
+
+/* ---------- Generador de crucigrama ---------- */
+function buildCrossword(list){
+  let best = null;
+  for(let attempt=0; attempt<60; attempt++){
+    const order = attempt===0 ? [...list].sort((a,b)=>b.w.length-a.w.length) : [list[0], ...list.slice(1)].sort(()=>Math.random()-.5).sort((a,b)=> attempt%3===0 ? b.w.length-a.w.length : 0);
+    const cells = {}, placed = [], fallo = [];
+    const put = (p) => { [...p.w].forEach((ch,k)=>{ const key=(p.r+(p.dir==='d'?k:0))+','+(p.c+(p.dir==='a'?k:0)); cells[key]=cells[key]||{ch,dirs:{}}; cells[key].dirs[p.dir]=1; }); placed.push(p); };
+    const fits = (w,r,c,dir) => {
+      const dr=dir==='d'?1:0, dc=dir==='a'?1:0; let cross=0;
+      const at=(y,x)=>cells[y+','+x];
+      if(at(r-dr,c-dc) || at(r+dr*w.length,c+dc*w.length)) return -1;
+      for(let k=0;k<w.length;k++){
+        const y=r+dr*k, x=c+dc*k, cur=at(y,x);
+        if(cur){ if(cur.ch!==w[k] || cur.dirs[dir]) return -1; cross++; }
+        else { if(dir==='a' && (at(y-1,x)||at(y+1,x))) return -1; if(dir==='d' && (at(y,x-1)||at(y,x+1))) return -1; }
+      }
+      return cross;
+    };
+    put({...order[0], r:0, c:0, dir:'a'});
+    for(const p of order.slice(1)){
+      let cand=null;
+      for(const q of placed) for(let i=0;i<q.w.length;i++) for(let j=0;j<p.w.length;j++){
+        if(q.w[i]!==p.w[j]) continue;
+        const dir = q.dir==='a'?'d':'a';
+        const r = dir==='d' ? q.r-j : q.r+i, c = dir==='d' ? q.c+i : q.c-j;
+        const cross = fits(p.w,r,c,dir); if(cross<1) continue;
+        const ys=placed.flatMap(z=>[z.r, z.r+(z.dir==='d'?z.w.length-1:0)]).concat([r, r+(dir==='d'?p.w.length-1:0)]);
+        const xs=placed.flatMap(z=>[z.c, z.c+(z.dir==='a'?z.w.length-1:0)]).concat([c, c+(dir==='a'?p.w.length-1:0)]);
+        const h=Math.max(...ys)-Math.min(...ys)+1, wd=Math.max(...xs)-Math.min(...xs)+1;
+        const score = cross*100 - h*wd - Math.abs(h-wd)*3 + Math.random();
+        if(!cand || score>cand.score) cand={r,c,dir,score};
+      }
+      if(cand) put({...p, r:cand.r, c:cand.c, dir:cand.dir}); else fallo.push(p.w);
+    }
+    const minR=Math.min(...placed.map(p=>p.r)), minC=Math.min(...placed.map(p=>p.c));
+    placed.forEach(p=>{ p.r-=minR; p.c-=minC; });
+    const filas=Math.max(...placed.map(p=>p.r+(p.dir==='d'?p.w.length:1))), cols=Math.max(...placed.map(p=>p.c+(p.dir==='a'?p.w.length:1)));
+    const score = -fallo.length*10000 - filas*cols - Math.max(0,cols-12)*400 - Math.abs(filas-cols)*4;
+    if(!best || score>best.score) best={placed, fallo, filas, cols, score};
+    if(attempt>15 && !best.fallo.length && best.cols<=12) break;
+  }
+  const starts = [...new Set(best.placed.map(p=>p.r*100+p.c))].sort((a,b)=>a-b);
+  const palabras = best.placed.map(p=>({w:p.w, clue:p.clue, r:p.r, c:p.c, dir:p.dir, n:starts.indexOf(p.r*100+p.c)+1}))
+    .sort((a,b)=>a.n-b.n || (a.dir==='a'?-1:1));
+  return {filas:best.filas, cols:best.cols, palabras, fallo:best.fallo};
+}
+
+/* ---------- Generador de sopa de letras ---------- */
+function buildSoup(words){
+  const maxLen = Math.max(...words.map(w=>w.length));
+  const DIRS = [[0,1],[1,0],[1,1],[-1,1],[0,-1],[1,-1]];
+  const FILL = 'AAABCDEEEFGHIILMNOOOPRRSSTTUV';
+  for(let N=Math.max(10,maxLen); N<=Math.max(13,maxLen); N++){
+    for(let attempt=0; attempt<200; attempt++){
+      const g = Array.from({length:N},()=>Array(N).fill(''));
+      let ok = true;
+      for(const w of [...words].sort((a,b)=>b.length-a.length)){
+        let done=false;
+        for(let t=0;t<150 && !done;t++){
+          const [dy,dx]=DIRS[Math.floor(Math.random()*DIRS.length)], y0=Math.floor(Math.random()*N), x0=Math.floor(Math.random()*N);
+          const y1=y0+dy*(w.length-1), x1=x0+dx*(w.length-1);
+          if(y1<0||y1>=N||x1<0||x1>=N) continue;
+          let fit=true; for(let k=0;k<w.length;k++){ const c=g[y0+dy*k][x0+dx*k]; if(c && c!==w[k]){ fit=false; break; } }
+          if(!fit) continue;
+          for(let k=0;k<w.length;k++) g[y0+dy*k][x0+dx*k]=w[k];
+          done=true;
+        }
+        if(!done){ ok=false; break; }
+      }
+      if(!ok) continue;
+      return g.map(row=>row.map(c=>c||FILL[Math.floor(Math.random()*FILL.length)]).join(''));
+    }
+  }
+  return null;
+}
+
+/* ---------- Guardar / eliminar ---------- */
+async function guardarComp(btn){
+  const f = ce, T = s => String(s||'').trim();
+  const faltan = [['t','nombre'],['short','descripción corta'],['goal','objetivo'],['videoUrl','enlace del video'],['compromiso','compromiso']].filter(([k])=>!T(f[k])).map(x=>x[1]);
+  const ideas = f.ideas.map(T).filter(Boolean);
+  if(!ideas.length) faltan.push('al menos una idea para recordar');
+  if(faltan.length){ cfMsg('Completa: ' + faltan.join(', ') + '.'); return; }
+  const nombre = T(f.t).toLowerCase();
+  if(allComps().some(m => m.code!==f.code && m.t.trim().toLowerCase()===nombre)){ cfMsg('Ya existe una competencia con ese nombre.'); return; }
+
+  let reto = {tipo:f.tipo};
+  if(f.tipo==='crucigrama'){
+    const v=validarCW(); if(v.err){ cfMsg(v.err); return; }
+    const res = (f.pv && f.pv.tipo==='crucigrama' && f.pv.key===v.key && f.pv.res && JSON.stringify(f.pv.res.palabras.map(p=>p.clue))===JSON.stringify(f.pv.res.palabras.map(p=>(v.list.find(q=>q.w===p.w)||{}).clue))) ? f.pv.res : buildCrossword(v.list);
+    if(res.fallo.length){ ce.pv={tipo:'crucigrama', key:v.key, res, fallo:res.fallo}; drawCat(true); cfMsg(`No se pudieron cruzar: <b>${res.fallo.map(esc).join(', ')}</b>. Cámbialas o agrega palabras que compartan letras con ellas.`); return; }
+    reto.palabras = res.palabras.map(p=>({...p, clue:(v.list.find(q=>q.w===p.w)||p).clue}));
+    reto.filas = res.filas; reto.cols = res.cols;
+  }
+  if(f.tipo==='sopa'){
+    const v=validarSP(); if(v.err){ cfMsg(v.err); return; }
+    const grid = (f.pv && f.pv.tipo==='sopa' && f.pv.key===v.words.join('|')) ? f.pv.grid : buildSoup(v.words);
+    if(!grid){ cfMsg('No se pudo armar la sopa con estas palabras. Prueba con palabras más cortas.'); return; }
+    reto.grid = grid; reto.palabras = v.words;
+  }
+  if(f.tipo==='ordenar'){
+    const pasos = f.ord.map(T).filter(Boolean);
+    if(pasos.length<3 || pasos.length>7){ cfMsg('El reto de ordenar necesita entre 3 y 7 pasos.'); return; }
+    reto.pasos = pasos;
+  }
+  if(f.tipo==='clasificar'){
+    const cats = f.cls.cats.map(c=>({n:T(c.n), a:T(c.a)})).filter(c=>c.n);
+    if(cats.length<2 || cats.length>3){ cfMsg('Define 2 o 3 categorías.'); return; }
+    if(new Set(cats.map(c=>c.n.toLowerCase())).size!==cats.length){ cfMsg('Hay categorías repetidas.'); return; }
+    const items = f.cls.items.map(it=>({t:T(it.t), cat:it.cat})).filter(it=>it.t||it.cat);
+    if(items.length<4 || items.length>10){ cfMsg('El reto de clasificar necesita entre 4 y 10 frases.'); return; }
+    const sinCat = items.find(it=>!it.t || !cats.some(c=>c.n===it.cat)); if(sinCat){ cfMsg(`Revisa la frase “${esc(sinCat.t||'(vacía)')}”: debe tener texto y una categoría correcta.`); return; }
+    const vacia = cats.find(c=>!items.some(it=>it.cat===c.n)); if(vacia){ cfMsg(`Ninguna frase pertenece a “${esc(vacia.n)}”. Cada categoría debe tener al menos una frase.`); return; }
+    reto.categorias = cats.map(c=>c.n); reto.ayuda = Object.fromEntries(cats.filter(c=>c.a).map(c=>[c.n,c.a])); reto.items = items;
+  }
+  const n = f.tipo==='sopa' ? reto.palabras.length : f.tipo==='ordenar' ? reto.pasos.length : 0;
+  reto.instruccion = T(f.instruccion) || INSTR[f.tipo](n);
+  reto.cierre = T(f.cierre) || CIERRE_DEF;
+
+  const code = f.code || newCode();
+  const def = {code, t:T(f.t), icon:f.icon, tag:T(f.tag)||'Fortalecer', short:T(f.short), dur:T(f.dur)||'8–10 min', goal:T(f.goal), ideas,
+    video:{titulo:T(f.videoTitulo)||`${T(f.t)} · video de la misión`, url:T(f.videoUrl), nota:'Míralo completo antes de resolver el reto.'},
+    reto, compromiso:T(f.compromiso), evidencia:T(f.evidencia), seguimiento:T(f.seguimiento)||'1 mes'};
+
+  btn.disabled=true; btn.textContent='Guardando…';
+  try{
+    const b = writeBatch(db);
+    b.set(doc(db,'catalogo',code), f.code ? {def, editado:serverTimestamp()} : {def, creado:serverTimestamp(), editado:serverTimestamp()}, {merge:true});
+    const afect = usersOf(code);
+    afect.forEach(t => b.update(doc(db,'rutas',t.codigo), {misiones:(t.competencias||[]).map(c => c.code===code ? {...c, def} : misionDe(c)), editado:serverTimestamp()}));
+    await b.commit();
+    toast(f.code ? (afect.length ? `✓ Competencia actualizada en ${afect.length} ${afect.length===1?'ruta':'rutas'}` : '✓ Competencia actualizada') : '✓ Competencia creada. Ya puedes asignarla desde el perfil de cada trabajador.');
+    ce=null; catView='list'; drawCat();
+  }catch(err){
+    cfMsg('No se pudo guardar (' + esc(err.code||err.message) + ').' + (err.code==='permission-denied' ? ' Revisa que publicaste las reglas nuevas de Firestore.' : ''));
+    btn.disabled=false; btn.textContent=f.code?'Guardar cambios':'Crear competencia';
+  }
+}
+async function borrarComp(code){
+  const m = compBy(code), us = usersOf(code);
+  if(us.length){ alert(`No se puede eliminar "${m.t}" porque está asignada a: ${us.map(t=>t.nombre).join(', ')}.\n\nQuítala primero de esos perfiles.`); return; }
+  if(!confirm(`¿Eliminar la competencia "${m.t}"? Esta acción no se puede deshacer.`)) return;
+  try{ await deleteDoc(doc(db,'catalogo',code)); toast('Competencia eliminada'); }
   catch(err){ toast('No se pudo eliminar (' + (err.code||err.message) + ')'); }
 }
 
